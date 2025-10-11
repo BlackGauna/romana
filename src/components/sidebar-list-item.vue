@@ -1,23 +1,24 @@
 <script setup lang="ts">
 import FileSvg from "../assets/file.svg";
 import GameSvg from "../assets/game.svg";
+import { UiType } from "../stores/uiState";
 
 defineProps<{
-  icon: IconVariant;
+  icon: UiType;
   title?: string;
   sideBarCollapsed: boolean;
+  active: boolean;
 }>();
-
-type IconVariant = "game" | "file";
 </script>
 
 <template>
   <div
     id="sidebar-icon-container"
-    class="ml-16 flex h-48 w-32 items-center justify-center"
+    class="flex h-48 w-48 items-center rounded-lg pl-8"
     :class="{
       'w-full': !sideBarCollapsed,
       'justify-start': !sideBarCollapsed,
+      'bg-background-active': active,
     }"
   >
     <div class="flex h-32 w-32 items-center justify-center">

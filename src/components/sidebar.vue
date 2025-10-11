@@ -1,7 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue";
+import { useUiState } from "../stores/uiState";
 import SidebarIcon from "./sidebar-icon.vue";
 import SidebarListItem from "./sidebar-list-item.vue";
+
+const { activeUi, setActiveUi } = useUiState();
 
 let sideBarCollapsed = ref(false);
 </script>
@@ -16,16 +19,23 @@ let sideBarCollapsed = ref(false);
       />
     </div>
 
-    <div id="main-sidebar" class="mt-32 flex w-full flex-col justify-center">
+    <div
+      id="main-sidebar"
+      class="mt-32 flex w-full flex-col items-center justify-center px-8"
+    >
       <SidebarListItem
         icon="game"
         title="Rom Library"
         :side-bar-collapsed="sideBarCollapsed"
+        :active="activeUi == 'game'"
+        @click="setActiveUi('game')"
       />
       <SidebarListItem
         icon="file"
         title="DAT File Editor"
         :side-bar-collapsed="sideBarCollapsed"
+        :active="activeUi == 'file'"
+        @click="setActiveUi('file')"
       />
     </div>
   </div>

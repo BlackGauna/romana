@@ -23,6 +23,7 @@
   --color-text-primary: #c4c4c4ff;
   --color-border-disabled: #26293dff;
   --color-text-selected: #7d76f8ff;
+  --color-background-active: #7d76f8ff;
   --color-text-secondary: #a0a0a0ff;
   --color-border-container: #29272cff;
 }
