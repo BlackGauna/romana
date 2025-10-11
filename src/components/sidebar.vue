@@ -10,7 +10,10 @@ let sideBarCollapsed = ref(false);
 </script>
 
 <template>
-  <div class="bg-sidebar h-lvh" :class="[sideBarCollapsed ? 'w-64' : 'w-232']">
+  <div
+    class="bg-sidebar border-border-container h-lvh border-r"
+    :class="[sideBarCollapsed ? 'w-64' : 'w-232']"
+  >
     <div id="sidebar-icon-row" class="flex w-full justify-end">
       <SidebarIcon
         icon="sidebar"
