@@ -8,7 +8,7 @@
     "dev:win": "tauri dev --target x86_64-pc-windows-gnu",
     "build": "vue-tsc --noEmit && vite build",
     "preview": "vite preview",
-    "tauri": "tauri --target x86_64-pc-windows-gnu"
+    "tauri": "tauri"
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.14",
@@ -16,6 +16,8 @@
     "@tauri-apps/plugin-opener": "^2",
     "@vueuse/core": "^13.9.0",
     "pinia": "^3.0.3",
+    "sql-formatter": "^15.6.10",
+    "sqlite3": "^5.1.7",
     "tailwindcss": "^4.1.14",
     "vue": "^3.5.13"
   },

@@ -1,18 +1,30 @@
 <script setup lang="ts">
-import ConsoleListItem from "./console-list-item.vue";
+import { useConsoleStore } from "../../stores/consoleStore"
+import ConsoleListItem from "./console-list-item.vue"
+
+const consoleStore = useConsoleStore()
 </script>
 
 <template>
   <div
-    class="bg-sidebar border-border-container flex h-full w-88 flex-col items-center justify-start border-r"
+    id="consoles-bar"
+    class="bg-sidebar border-border-container flex h-full w-88 flex-col items-center justify-start overflow-y-auto border-r"
   >
-    <div class="flex h-64 items-center justify-center">
-      <span>Cons</span>
+    <div class="">
+      <div class="flex h-64 items-center justify-center">
+        <span>Consoles</span>
+      </div>
     </div>
     <div class="bg-border-container h-1 w-full"></div>
-    <template v-for="i in 5" :key="i">
-      <ConsoleListItem />
+    <div v-for="console in consoleStore.consoles" :key="console.name">
+      <ConsoleListItem :name="console.name" :id="console.id" />
       <div class="bg-border-container h-1 w-full"></div>
-    </template>
+    </div>
   </div>
 </template>
+
+<style lang="css" scoped>
+#consoles-bar {
+  overflow-x: hidden;
+}
+</style>

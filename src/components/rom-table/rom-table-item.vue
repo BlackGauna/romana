@@ -1,5 +1,10 @@
 <script setup lang="ts">
 import { ref } from "vue"
+import { type GameWithRoms } from "../../types/game"
+
+const props = defineProps<{
+  game: GameWithRoms
+}>()
 
 const hovered = ref(false)
 </script>
@@ -23,7 +28,7 @@ const hovered = ref(false)
           class="mb-4"
           :class="{ 'text-text-selected': hovered }"
         >
-          Super Mario World
+          {{ props.game.title }}
         </span>
         <span class="h-fit text-[10px]">SNES • 1990</span>
       </div>

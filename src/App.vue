@@ -1,22 +1,14 @@
 <script setup lang="ts">
-import { invoke } from "@tauri-apps/api/core"
-import { ref } from "vue"
 import RomListContainer from "./components/rom-list/rom-list-container.vue"
 import Sidebar from "./components/sidebar.vue"
-
-const greetMsg = ref("")
-const name = ref("")
-
-async function greet() {
-  // Learn more about Tauri commands at https://tauri.app/develop/calling-rust/
-  greetMsg.value = await invoke("greet", { name: name.value })
-}
 </script>
 
 <template>
-  <div class="flex h-full w-full justify-start">
-    <Sidebar />
-    <RomListContainer />
+  <div class="flex h-screen w-full justify-start select-none">
+    <nav class="sticky top-0 h-fit self-start">
+      <Sidebar />
+    </nav>
+    <RomListContainer class="h-full flex-1" />
   </div>
 </template>
 

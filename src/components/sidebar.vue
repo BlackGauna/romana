@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { ref } from "vue";
-import { useUiState } from "../stores/uiState";
-import SidebarIcon from "./sidebar-icon.vue";
-import SidebarListItem from "./sidebar-list-item.vue";
+import { ref } from "vue"
+import { useUiState } from "../stores/uiState"
+import SidebarIcon from "./sidebar-icon.vue"
+import SidebarListItem from "./sidebar-list-item.vue"
 
-const { activeUi, setActiveUi } = useUiState();
+const { activeUi, setActiveUi } = useUiState()
 
-let sideBarCollapsed = ref(false);
+let sideBarCollapsed = ref(false)
 </script>
 
 <template>

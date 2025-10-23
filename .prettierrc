@@ -2,5 +2,6 @@
   "plugins": ["prettier-plugin-tailwindcss"],
   "htmlWhitespaceSensitivity": "ignore",
   "bracketSameLine": false,
-  "semi": false
+  "semi": false,
+  "printWidth": 80
 }
