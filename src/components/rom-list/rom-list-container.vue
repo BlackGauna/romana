@@ -4,7 +4,10 @@ import RomTable from "../rom-table/rom-table.vue"
 </script>
 
 <template>
-  <div id="main-container" class="bg-background-primary flex w-dvw items-start">
+  <div
+    id="main-container"
+    class="bg-background-primary flex h-full w-dvw items-start"
+  >
     <ConsoleList
       class="sticky top-0 h-screen overflow-y-auto overscroll-contain"
     />
