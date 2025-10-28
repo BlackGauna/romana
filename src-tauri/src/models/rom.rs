@@ -45,7 +45,7 @@ impl<'a> NewRom<'a> {
         NewRom {
             title: &dat_rom.name,
             md5: &dat_rom.md5,
-            size: &0,
+            size: &dat_rom.size,
             game_id: &game_db_id,
         }
     }

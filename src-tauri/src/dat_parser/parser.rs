@@ -1,14 +1,14 @@
 use std::{collections::HashMap, fs, path::Path};
 
-use diesel::{insert_into, upsert::excluded, ExpressionMethods, RunQueryDsl};
+use diesel::{ExpressionMethods, RunQueryDsl, insert_into, upsert::excluded};
 use html_escape::decode_html_entities;
 use serde::Serialize;
 use winnow::{
+    ModalResult, Parser, Result,
     ascii::{alphanumeric1, multispace0},
     combinator::{alt, delimited, preceded, repeat, separated, separated_pair, seq, terminated},
     error::ContextError,
     token::take_until,
-    ModalResult, Parser, Result,
 };
 
 use crate::{
@@ -28,7 +28,7 @@ pub struct DatRom {
     pub name: String,
     pub md5: String,
     pub regions: Vec<String>,
-    size: u32,
+    pub size: i32,
 }
 
 #[derive(Debug, PartialEq, Serialize)]
@@ -199,6 +199,7 @@ fn game_parser<'s>(input: &mut &'s str) -> Result<HashMap<&'s str, &'s str>> {
     delimited(tag_start, attributes_parser, alt((">", "/>"))).parse_next(input)
 }
 
+// TODO: need to be able to parse multi-rom games
 fn rom_parser<'s>(input: &mut &'s str) -> Result<HashMap<&'s str, &'s str>> {
     let tag_start = preceded(take_until(0.., "<rom"), "<rom");
 
@@ -365,28 +366,9 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_read_file() {
-        let dat_file_path = String::from("tests/SNES v Recommended.dat");
-        let path = Path::new(&dat_file_path);
-
-        let test = fs::read_to_string(path).expect("error readfing file");
-
-        println!("{:?}", &test[..50])
-    }
-
-    #[test]
-    fn test_dat_file_parse() {
-        let dat_file_path = String::from("tests/SNES v Recommended.dat");
-
-        parse_file(&dat_file_path).expect("error parsing games from dat.");
-
-        // println!("{:#?}", &games[0..2]);
-    }
-
-    #[test]
     fn test_new_dat_file_parse() {
         let dat_file_path = String::from(
-            "tests/Nintendo - Super Nintendo Entertainment System (20251012-045317).dat",
+            "DATs/Nintendo - Super Nintendo Entertainment System (20251012-045317).dat",
         );
 
         parse_file(&dat_file_path).expect("error parsing games from dat.");
@@ -419,11 +401,12 @@ mod tests {
 
     #[test]
     fn test_game_parser() {
-        let mut input = r#"<game name="ActRaiser (Europe)">
-      <description>ActRaiser (Europe)</description>
-      <release name="ActRaiser (Europe)" region="EUR"></release>
-      <rom name="ActRaiser (Europe).sfc" size="1048576" crc="09097b2b" md5="9b36075b53dec1a506b1f9334e670c63" sha1="b76621e0b9d882c8b8463203f5423ca7d45cc5bf" status="verified"></rom>
-  </game>"#;
+        let mut input = r#"
+        <game name="'96 Zenkoku Koukou Soccer Senshuken (Japan)" id="0001">
+		<category>Games</category>
+		<description>'96 Zenkoku Koukou Soccer Senshuken (Japan)</description>
+		<rom name="'96 Zenkoku Koukou Soccer Senshuken (Japan).sfc" size="1572864" crc="05fbb855" md5="3369347f7663b133ce445c15200a5afa" sha1="005ccd8362dc41491f89f31fc9326a6688300e0c" sha256="b2229302c1561f8a7081534f3f27de0f130864cc7c585730ada4be9ced36df4d"/>
+	</game>"#;
 
         let output = entry_parser(&mut input).unwrap();
 
