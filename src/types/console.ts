@@ -5,6 +5,7 @@ export type Console = {
   name: string
   manufacturer: string
   abbreviation: string
+  inLibrary: boolean
 }
 
 export type ConsoleWithGames = Console & { games: Game[] }

@@ -5,6 +5,7 @@ diesel::table! {
         id -> Integer,
         title -> Text,
         console_id -> Integer,
+        metadata_id -> Nullable<Integer>,
     }
 }
 

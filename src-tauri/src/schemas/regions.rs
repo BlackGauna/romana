@@ -1,4 +1,3 @@
-
 diesel::table! {
     regions (id) {
         id -> Integer,

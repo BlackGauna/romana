@@ -3,8 +3,9 @@ diesel::table! {
         id -> Integer,
         title -> Text,
         md5 -> Text,
+        crc -> Text,
         size -> Integer,
-        game_id -> Integer,
+        release_id -> Integer,
     }
 }
 

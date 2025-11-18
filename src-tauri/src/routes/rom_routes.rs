@@ -1,44 +1,26 @@
-use diesel::{prelude::*, result::Error};
+use diesel::prelude::*;
 
 use crate::{
+    error::AppError,
     establish_connection,
-    models::{Region, Rom, RomRegion, RomWithRegion},
+    models::{Game, Release, Rom},
     schemas::*,
 };
 
-pub fn get_roms_with_region() -> Result<Vec<RomWithRegion>, Error> {
-    let connection = &mut establish_connection();
+pub fn roms_for_console(console_id: &i32) -> Result<Vec<Rom>, AppError> {
+    let conn = &mut establish_connection();
 
-    let roms = roms_table::table
+    let games: Vec<Game> = games_table
+        .filter(games_table::console_id.eq(console_id))
+        .select(Game::as_select())
+        .load::<Game>(conn)?;
+
+    let releases = Release::belonging_to(&games)
+        .select(Release::as_select())
+        .load(conn)?;
+
+    Rom::belonging_to(&releases)
         .select(Rom::as_select())
-        .load(connection)?;
-
-    let regions = RomRegion::belonging_to(&roms)
-        .inner_join(regions_table::table)
-        .select((RomRegion::as_select(), Region::as_select()))
-        .load(connection)?;
-
-    let roms_with_regions :Vec<RomWithRegion>= regions.grouped_by(&roms)
-    .into_iter().zip(roms)
-    .map(|(r, rom)| 
-    RomWithRegion { rom, regions: r.into_iter().map(|(_, region)| region).collect() }
-  )
-    .collect::<Vec<RomWithRegion>>();
-
-    Ok(roms_with_regions)
-}
-
-#[cfg(test)]
-mod tests{
-    use super::*;
-
-    #[test]
-    fn test() {
-        let results = get_roms_with_region().expect("error getting roms");
-        let json = serde_json::to_value(&results).unwrap();
-
-
-        
-        println!("{:#?}", json);
-    }
+        .load(conn)
+        .map_err(AppError::DatabaseError)
 }

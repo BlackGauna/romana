@@ -25,7 +25,7 @@ pub struct RomPaths {
 
 impl Default for AppConfig {
     fn default() -> Self {
-        let mut consoles = console_routes::get_consoles();
+        let mut consoles = console_routes::get_consoles().expect("eeror getting consoles");
         consoles.sort_by_key(|console| console.abbreviation.clone());
         Self {
             rom_paths: consoles

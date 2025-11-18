@@ -1,13 +1,21 @@
-use diesel::prelude::*;
+use diesel_enums::diesel_enum;
 use serde::Serialize;
+use strum_macros::{Display, EnumString};
 
-use crate::schemas::regions_table;
-
-#[derive(Queryable, Debug, Selectable, Serialize, Identifiable, PartialEq, Clone)]
-#[diesel(table_name = regions_table)]
-#[diesel(check_for_backend(diesel::sqlite::Sqlite))]
-pub struct Region {
-    pub id: i32,
-    pub name: String,
-    pub abbreviation: String,
+#[derive(Serialize, EnumString, Display)]
+#[diesel_enum(skip_check, table = regions, case="kebab-case", id_mapping(default))]
+#[strum(ascii_case_insensitive)]
+pub enum Region {
+    #[db_mapping(id = 0)]
+    World = 0,
+    Japan,
+    USA,
+    Europe,
+    Germany,
+    Australia,
+    Spain,
+    France,
+    Sweden,
+    Italia,
+    Scandinavia,
 }

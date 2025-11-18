@@ -4,6 +4,8 @@ diesel::table! {
         name -> Text,
         abbreviation -> Text,
         manufacturer -> Text,
+        in_library -> Bool,
+
     }
 }
 

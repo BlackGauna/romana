@@ -8,20 +8,21 @@ use serde::Serialize;
 
 use crate::{
     dat_parser::parser::DatRom,
-    models::{Game, Region},
+    models::{Game, Region, Release},
     schemas::roms::*,
 };
 
 #[derive(Queryable, Debug, Selectable, Serialize, Identifiable, Associations, PartialEq, Clone)]
-#[diesel(belongs_to(Game))]
+#[diesel(belongs_to(Release))]
 #[diesel(table_name = roms)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
 pub struct Rom {
     pub id: i32,
     pub title: String,
     pub md5: String,
+    pub crc: String,
     pub size: i32,
-    pub game_id: i32,
+    pub release_id: i32,
 }
 
 #[derive(Serialize, Debug)]
@@ -33,20 +34,23 @@ pub struct RomWithRegion {
 
 #[derive(Insertable, Debug)]
 #[diesel(table_name = roms)]
+#[diesel(treat_none_as_default_value = false)]
 pub struct NewRom<'a> {
     pub title: &'a str,
     pub md5: &'a str,
+    pub crc: &'a str,
     pub size: &'a i32,
-    pub game_id: &'a i32,
+    pub release_id: &'a i32,
 }
 
 impl<'a> NewRom<'a> {
-    pub fn from_dat(dat_rom: &'a DatRom, game_db_id: &'a i32) -> Self {
+    pub fn from_dat(dat_rom: &'a DatRom, release_db_id: &'a i32) -> Self {
         NewRom {
             title: &dat_rom.name,
             md5: &dat_rom.md5,
+            crc: &dat_rom.crc,
             size: &dat_rom.size,
-            game_id: &game_db_id,
+            release_id: &release_db_id,
         }
     }
 }

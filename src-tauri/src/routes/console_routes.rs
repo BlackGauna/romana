@@ -1,19 +1,25 @@
-use diesel::{prelude::*, result::Error};
+use diesel::{delete, dsl::insert_into, prelude::*, result::Error, update};
 
 use crate::{
+    error::AppError,
     establish_connection,
-    models::{Console, ConsoleWithGameRoms, ConsoleWithGames, Game, GameWithRoms, Rom},
-    schemas::{consoles::name, consoles_table},
+    models::{
+        Console, ConsoleWithGameRoms, ConsoleWithGames, Game, console_location::NewConsoleLocation,
+    },
+    routes::games_routes::get_games_for_console,
+    schemas::{console_locations, console_locations_table, consoles::name, consoles_table},
 };
 
-pub fn get_consoles() -> Vec<Console> {
+pub fn get_consoles() -> Result<Vec<Console>, AppError> {
     let connection = &mut establish_connection();
 
-    consoles_table::table
+    let mut consoles = consoles_table::table
         .filter(consoles_table::id.gt(0))
         .select(Console::as_select())
-        .load(connection)
-        .expect("Error getting consoles")
+        .load(connection)?;
+
+    consoles.sort_by(|a, b| natord::compare(&a.name, &b.name));
+    Ok(consoles)
 }
 
 pub fn get_all_consoles_with_games() -> Result<Vec<ConsoleWithGames>, Error> {
@@ -52,36 +58,47 @@ pub fn get_console_by_name(console_name: &str) -> Console {
         .unwrap_or_else(|_| panic!("Error getting console with name: {}", console_name))
 }
 
-pub fn get_console_with_game_roms(console_name: &str) -> ConsoleWithGameRoms {
+pub fn get_console_game_roms(console_name: &str) -> Result<ConsoleWithGameRoms, AppError> {
     let conn = &mut establish_connection();
 
     let console = consoles_table::table
         .filter(name.eq(console_name))
         .select(Console::as_select())
-        .first(conn)
-        .unwrap_or_else(|_| panic!("Error getting console with name: {}", console_name));
+        .first(conn)?;
 
-    let games = Game::belonging_to(&console)
-        .select(Game::as_select())
-        .load(conn)
-        .unwrap();
+    let games = get_games_for_console(&console.id)?;
 
-    let roms = Rom::belonging_to(&games)
-        .select(Rom::as_select())
-        .load(conn)
-        .unwrap();
+    Ok(ConsoleWithGameRoms { console, games })
+}
 
-    let game_roms = roms
-        .grouped_by(&games)
-        .into_iter()
-        .zip(games)
-        .map(|(roms, game)| GameWithRoms { game, roms })
-        .collect::<Vec<GameWithRoms>>();
+pub fn add_console_location(console_id: i32, location: String) -> Result<i32, AppError> {
+    let conn = &mut establish_connection();
 
-    ConsoleWithGameRoms {
-        console,
-        games: game_roms,
-    }
+    let result: i32 = insert_into(console_locations_table)
+        .values(NewConsoleLocation {
+            location,
+            console_id,
+        })
+        // .on_conflict_do_nothing()
+        .returning(console_locations_table::id)
+        .get_result(conn)?;
+
+    Ok(result)
+}
+
+pub fn delete_console_location(location_id: i32) -> Result<i32, AppError> {
+    let conn = &mut establish_connection();
+
+    let deleted: i32 = delete(console_locations_table.filter(console_locations::id.eq(location_id)))
+        .execute(conn)? as i32;
+
+    Ok(deleted)
+}
+
+pub fn update_console(console: Console) -> Result<(), AppError> {
+    let conn = &mut establish_connection();
+    update(consoles_table).set(&console).execute(conn)?;
+    Ok(())
 }
 
 #[cfg(test)]
@@ -90,10 +107,18 @@ mod tests {
 
     #[test]
     fn test_console_game_roms() {
-        let mut console = get_console_with_game_roms("Super Nintendo Entertainment System");
+        let mut console = get_console_game_roms("Super Nintendo Entertainment System").unwrap();
         console.games = console.games[..10].to_vec();
 
         let json = serde_json::to_string_pretty(&console).unwrap();
         println!("{}", json);
+    }
+
+    #[test]
+    fn test_add_and_delete_console_location() {
+        let location_id = add_console_location(1, "location".to_string()).unwrap();
+        println!("saved console location with id {:?}", location_id);
+        let deleted_count = delete_console_location(location_id).unwrap();
+        println!("deleted {:?} row", deleted_count);
     }
 }

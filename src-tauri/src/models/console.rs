@@ -1,20 +1,25 @@
 use ::diesel::prelude::*;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 use crate::{
-    models::{game::Game, GameWithRoms},
+    models::{GameWithReleases, game::Game},
     schemas::consoles::*,
 };
 
-#[derive(Queryable, Debug, Selectable, Serialize, Identifiable, PartialEq)]
+#[derive(
+    Queryable, Debug, Selectable, Serialize, Deserialize, Identifiable, PartialEq, AsChangeset,
+)]
 #[diesel(table_name = consoles)]
 #[diesel(check_for_backend(diesel::sqlite::Sqlite))]
+#[serde(rename_all = "camelCase")]
 pub struct Console {
     pub id: i32,
     pub name: String,
     pub abbreviation: String,
     pub manufacturer: String,
+    pub in_library: bool,
 }
+
 #[derive(Serialize, Debug)]
 pub struct ConsoleWithGames {
     #[serde(flatten)]
@@ -26,7 +31,7 @@ pub struct ConsoleWithGames {
 pub struct ConsoleWithGameRoms {
     #[serde(flatten)]
     pub console: Console,
-    pub games: Vec<GameWithRoms>,
+    pub games: Vec<GameWithReleases>,
 }
 
 #[derive(Insertable, Debug)]

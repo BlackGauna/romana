@@ -1,13 +1,24 @@
+pub mod artwork;
+pub mod artwork_type;
 pub mod console;
+pub mod console_location;
 pub mod developer;
 pub mod game;
+pub mod metadata;
 pub mod region;
+pub mod release;
+pub mod release_region;
+pub mod release_type;
 pub mod rom;
-pub mod rom_region;
 
+pub use artwork::*;
+pub use artwork_type::*;
 pub use console::*;
 pub use developer::*;
 pub use game::*;
+pub use metadata::*;
 pub use region::*;
+pub use release::*;
+pub use release_region::*;
+pub use release_type::*;
 pub use rom::*;
-pub use rom_region::*;

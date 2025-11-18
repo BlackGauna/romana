@@ -1,6 +1,9 @@
+use std::collections::HashMap;
+
 use crate::{
+    error::AppError,
     establish_connection,
-    models::{game::Game, GameWithRoms, Rom},
+    models::{GameWithReleases, Release, ReleaseWithRoms, Rom, game::Game},
     schemas::games_table,
 };
 use diesel::prelude::*;
@@ -15,23 +18,48 @@ pub fn get_all_games() -> Vec<Game> {
     results
 }
 
-pub fn get_games_for_console(console_id: &i32) -> Vec<GameWithRoms> {
+pub fn get_games_for_console(console_id: &i32) -> Result<Vec<GameWithReleases>, AppError> {
     let conn = &mut establish_connection();
 
     let games: Vec<Game> = games_table
         .filter(games_table::console_id.eq(console_id))
         .select(Game::as_select())
         .load(conn)
-        .unwrap_or_else(|_| panic!("Error loading games for console with id {}", console_id));
+        .map_err(AppError::DatabaseError)?;
 
-    let roms = Rom::belonging_to(&games)
+    let releases = Release::belonging_to(&games)
+        .select(Release::as_select())
+        .load(conn)?;
+
+    let roms = Rom::belonging_to(&releases)
         .select(Rom::as_select())
         .load(conn)
-        .expect("error loading game roms");
+        .map_err(AppError::DatabaseError)?;
 
-    roms.grouped_by(&games)
+    let release_roms = roms
+        .grouped_by(&releases)
         .into_iter()
-        .zip(games)
-        .map(|(roms, game)| GameWithRoms { game, roms })
-        .collect::<Vec<GameWithRoms>>()
+        .zip(releases)
+        .map(|(roms, release)| ReleaseWithRoms { release, roms })
+        .collect::<Vec<ReleaseWithRoms>>();
+
+    let mut game_collection: HashMap<i32, Vec<ReleaseWithRoms>> = HashMap::new();
+
+    for rel in release_roms {
+        game_collection
+            .entry(rel.release.game_id)
+            .or_default()
+            .push(rel);
+    }
+
+    Ok(games
+        .into_iter()
+        .map(|game| {
+            let release = game_collection.remove(&game.id).unwrap_or_default();
+            GameWithReleases {
+                game,
+                releases: release,
+            }
+        })
+        .collect())
 }

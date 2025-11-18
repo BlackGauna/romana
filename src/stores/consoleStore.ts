@@ -1,5 +1,5 @@
 import { defineStore } from "pinia"
-import { ref, watchEffect } from "vue"
+import { computed, ref, watchEffect } from "vue"
 import { getConsoles } from "../api/consoles-api"
 import { Console } from "../types/console"
 
@@ -9,15 +9,18 @@ export const useConsoleStore = defineStore("console", () => {
   const isInitialized = ref(false)
   const isLoading = ref(false)
 
+  const consolesInLibrary = computed(() =>
+    consoles.value.filter((c) => c.inLibrary),
+  )
+
   async function fetchConsoles() {
     // TODO: error handling
     if (isLoading.value) return
     isLoading.value = true
     console.log("fetching consoles")
 
-    consoles.value = (await getConsoles()).filter((console) =>
-      console.name.toLowerCase().includes("nintendo"),
-    )
+    consoles.value = await getConsoles()
+
     isInitialized.value = true
     isLoading.value = false
   }
@@ -36,5 +39,6 @@ export const useConsoleStore = defineStore("console", () => {
     isInitialized,
     setActiveConsoleId,
     activeConsoleId,
+    consolesInLibrary,
   }
 })
